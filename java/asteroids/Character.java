@@ -47,4 +47,6 @@ public abstract class Character {
         Shape collisionArea = Shape.intersect(this.character, other.getCharacter());
         return collisionArea.getBoundsInLocal().getWidth() != -1;
     }
+
+
 }

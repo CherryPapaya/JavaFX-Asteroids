@@ -6,29 +6,30 @@ import javafx.geometry.Point2D;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Polygon;
 import javafx.stage.Stage;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class AsteroidsApplication extends Application {
+
+    public static int WIDTH = 300;
+    public static int HEIGHT = 200;
     @Override
     public void start(Stage stage) throws Exception {
         Pane pane = new Pane();
-        pane.setPrefSize(600, 400);
+        pane.setPrefSize(WIDTH, HEIGHT);
 
-        Ship ship = new Ship(300, 200);
-        Asteroid asteroid = new Asteroid(50, 50);
+        Ship ship = new Ship(WIDTH / 2, HEIGHT / 2);
+        List<Asteroid> asteroids = new ArrayList<>();
+
+        for (int i = 0; i < 5; i++) {
+            Random rnd = new Random();
+            Asteroid asteroid = new Asteroid(rnd.nextInt(WIDTH / 3), rnd.nextInt(HEIGHT));
+            asteroids.add(asteroid);
+        }
 
         pane.getChildren().add(ship.getCharacter());
-        pane.getChildren().add(asteroid.getCharacter());
-
-        asteroid.turnRight();
-        asteroid.turnRight();
-        asteroid.accelerate();
-        asteroid.accelerate();
+        asteroids.forEach(asteroid -> pane.getChildren().add(asteroid.getCharacter()));
 
         Scene scene = new Scene(pane);
         Map<KeyCode, Boolean> pressedKeys = new HashMap<>();
@@ -58,11 +59,13 @@ public class AsteroidsApplication extends Application {
                 }
 
                 ship.move();
-                asteroid.move();
+                asteroids.forEach(asteroid -> asteroid.move());
 
-                if (ship.collide(asteroid)) {
-                    stop();
-                }
+                asteroids.forEach(asteroid -> {
+                    if (ship.collide(asteroid)) {
+                        stop();
+                    }
+                });
             }
         }.start();
 
