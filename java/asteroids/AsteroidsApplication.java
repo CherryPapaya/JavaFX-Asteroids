@@ -20,6 +20,7 @@ public class AsteroidsApplication extends Application {
         pane.setPrefSize(WIDTH, HEIGHT);
 
         Ship ship = new Ship(WIDTH / 2, HEIGHT / 2);
+        List<Projectile> projectiles = new ArrayList<>();
         List<Asteroid> asteroids = new ArrayList<>();
 
         for (int i = 0; i < 5; i++) {
@@ -58,8 +59,17 @@ public class AsteroidsApplication extends Application {
                     ship.accelerate();
                 }
 
+                if (pressedKeys.getOrDefault(KeyCode.SPACE, false)) {
+                    Projectile projectile = new Projectile((int) ship.getCharacter().getTranslateX(), (int) ship.getCharacter().getTranslateY());
+                    projectile.getCharacter().setRotate(ship.getCharacter().getRotate());
+                    projectiles.add(projectile);
+
+                    pane.getChildren().add(projectile.getCharacter());
+                    projectiles.forEach(Character::move);
+                }
+
                 ship.move();
-                asteroids.forEach(asteroid -> asteroid.move());
+                asteroids.forEach(Character::move);
 
                 asteroids.forEach(asteroid -> {
                     if (ship.collide(asteroid)) {
