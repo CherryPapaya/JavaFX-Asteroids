@@ -17,10 +17,18 @@ public class AsteroidsApplication extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         Pane pane = new Pane();
-        Ship ship = new Ship(300, 200);
-
         pane.setPrefSize(600, 400);
+
+        Ship ship = new Ship(300, 200);
+        Asteroid asteroid = new Asteroid(50, 50);
+
         pane.getChildren().add(ship.getCharacter());
+        pane.getChildren().add(asteroid.getCharacter());
+
+        asteroid.turnRight();
+        asteroid.turnRight();
+        asteroid.accelerate();
+        asteroid.accelerate();
 
         Scene scene = new Scene(pane);
         Map<KeyCode, Boolean> pressedKeys = new HashMap<>();
@@ -50,6 +58,11 @@ public class AsteroidsApplication extends Application {
                 }
 
                 ship.move();
+                asteroid.move();
+
+                if (ship.collide(asteroid)) {
+                    stop();
+                }
             }
         }.start();
 
