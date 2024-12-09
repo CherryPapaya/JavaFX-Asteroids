@@ -7,6 +7,7 @@ import javafx.scene.shape.Shape;
 public abstract class Character {
     private Polygon character;
     private Point2D movement;
+    private boolean isAlive;
 
     public Character(Polygon polygon, int x, int y) {
         this.character = polygon;
@@ -14,10 +15,28 @@ public abstract class Character {
         this.character.setTranslateY(y);
 
         this.movement = new Point2D(0, 0);
+
+        this.isAlive = true;
     }
 
     public Polygon getCharacter() {
         return this.character;
+    }
+
+    public Point2D getMovement() {
+        return this.movement;
+    }
+
+    public void setMovement(Point2D movement) {
+        this.movement = movement;
+    }
+
+    public boolean isAlive() {
+        return this.isAlive;
+    }
+
+    public void setAlive(boolean isAlive) {
+        this.isAlive = isAlive;
     }
 
     public void turnLeft() {
@@ -32,6 +51,7 @@ public abstract class Character {
         this.character.setTranslateX(this.character.getTranslateX() + this.movement.getX());
         this.character.setTranslateY(this.character.getTranslateY() + this.movement.getY());
 
+        // these ifs constrain the characters to within the screen
         if (this.character.getTranslateX() < 0) {
             this.character.setTranslateX(this.character.getTranslateX() + AsteroidsApplication.WIDTH);
         }

@@ -6,18 +6,23 @@ import javafx.geometry.Point2D;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class AsteroidsApplication extends Application {
-
     public static int WIDTH = 300;
     public static int HEIGHT = 200;
     @Override
     public void start(Stage stage) throws Exception {
         Pane pane = new Pane();
         pane.setPrefSize(WIDTH, HEIGHT);
+
+        Text text = new Text(10, 20, "Points: 0");
+        AtomicInteger points = new AtomicInteger();
 
         Ship ship = new Ship(WIDTH / 2, HEIGHT / 2);
         List<Projectile> projectiles = new ArrayList<>();
@@ -29,7 +34,7 @@ public class AsteroidsApplication extends Application {
             asteroids.add(asteroid);
         }
 
-        pane.getChildren().add(ship.getCharacter());
+        pane.getChildren().addAll(ship.getCharacter(), text);
         asteroids.forEach(asteroid -> pane.getChildren().add(asteroid.getCharacter()));
 
         Scene scene = new Scene(pane);
@@ -59,23 +64,61 @@ public class AsteroidsApplication extends Application {
                     ship.accelerate();
                 }
 
-                if (pressedKeys.getOrDefault(KeyCode.SPACE, false)) {
+                if (pressedKeys.getOrDefault(KeyCode.SPACE, false) && projectiles.size() < 3) {
                     Projectile projectile = new Projectile((int) ship.getCharacter().getTranslateX(), (int) ship.getCharacter().getTranslateY());
                     projectile.getCharacter().setRotate(ship.getCharacter().getRotate());
                     projectiles.add(projectile);
 
+                    projectile.accelerate();
+                    projectile.setMovement(projectile.getMovement().normalize().multiply(3));
+
                     pane.getChildren().add(projectile.getCharacter());
-                    projectiles.forEach(Character::move);
                 }
 
                 ship.move();
                 asteroids.forEach(Character::move);
+                projectiles.forEach(Character::move);
 
                 asteroids.forEach(asteroid -> {
                     if (ship.collide(asteroid)) {
                         stop();
                     }
                 });
+
+                // Set alive status of asteroid and projectile to false if collided
+                projectiles.forEach(projectile -> {
+                    asteroids.forEach(asteroid -> {
+                        if (projectile.collide(asteroid)) {
+                            projectile.setAlive(false);
+                            asteroid.setAlive(false);
+                            text.setText("Points: " + points.addAndGet(1000));
+                        }
+                    });
+                });
+
+                // Removes projectile and asteroid if collided
+                projectiles.stream()
+                        .filter(projectile -> !projectile.isAlive())
+                        .forEach(projectile -> pane.getChildren().remove(projectile.getCharacter()));
+                projectiles.removeAll(projectiles.stream()
+                        .filter(projectile -> !projectile.isAlive())
+                        .collect(Collectors.toList()));
+
+                asteroids.stream()
+                        .filter(asteroid -> !asteroid.isAlive())
+                        .forEach(asteroid -> pane.getChildren().remove(asteroid.getCharacter()));
+                asteroids.removeAll(asteroids.stream()
+                        .filter(asteroid -> !asteroid.isAlive())
+                        .collect(Collectors.toList()));
+
+                if (Math.random() < 0.005) {
+                    Asteroid asteroid = new Asteroid(WIDTH, HEIGHT);
+                    if (!asteroid.collide(ship)) {
+                        asteroids.add(asteroid);
+                        pane.getChildren().add(asteroid.getCharacter());
+                    }
+                }
+
             }
         }.start();
 
@@ -90,7 +133,7 @@ public class AsteroidsApplication extends Application {
 
     public static int partsCompleted() {
         // State how many parts you have completed using the return value of this method
-        return 0;
+        return 4;
     }
 
 }
